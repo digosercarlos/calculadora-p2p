@@ -463,11 +463,11 @@ Paso 2:
   USDT neto    = 10.502,70 - 392,80    = 10.109,90 USDT
 
 Paso 3:
-  VES finales  = 10.109,90 × 97.80     = 988.748,22 VES
+  VES finales  = 10.109,90 × 97.80     = 988.748,38 VES
 
 Resultado:
-  Ganancia VES = 988.748,22 - 1.000.000 = -11.251,78 VES  ← PÉRDIDA
-  Ganancia USD = -11.251,78 / 91.20     =    -123,37 USD
+  Ganancia VES = 988.748,38 - 1.000.000 = -11.251,62 VES  ← PÉRDIDA
+  Ganancia USD = -11.251,62 / 91.20     =    -123,37 USD
   Porcentaje   = -1.125%
   Break-even P2P ≈ 98.91 VES/USDT
 

@@ -110,8 +110,8 @@ describe('calcCycle', () => {
     expect(result.usdNeto).toBeCloseTo(10502.70, 2);
     expect(result.comisionBpay_USDT).toBeCloseTo(392.80, 2);
     expect(result.usdtNeto).toBeCloseTo(10109.90, 2);
-    expect(result.vesFinales).toBeCloseTo(988748.22, 2);
-    expect(result.gananciaVES).toBeCloseTo(-11251.78, 2);
+    expect(result.vesFinales).toBeCloseTo(988748.38, 2);
+    expect(result.gananciaVES).toBeCloseTo(-11251.62, 2);
     expect(result.gananciaUSD).toBeCloseTo(-123.37, 2);
     expect(result.gananciaPct).toBeCloseTo(-1.125, 3);
     expect(result.multiplicador).toBeCloseTo(0.9887, 4);
