@@ -54,8 +54,8 @@ VES (capital inicial)
 | `T_d` | Tasa VES Digital (VES / 1 USD) | Manual — referencia @monitordolarvzla |
 | `T_p2p` | Tasa Binance P2P (VES / 1 USDT) | Manual — referencia @monitordolarvzla |
 | `T_bcv` | Tasa BCV oficial (VES / 1 USD) | Manual — referencia @monitordolarvzla |
-| `FEE_bdv` | Comisión BDV fija | 0.0285 (hardcoded) |
-| `FEE_bpay` | Comisión Bpay fija | 0.0374 (hardcoded) |
+| `FEE_bdv` | Comisión BDV | 0.0285 (default, configurable en UI) |
+| `FEE_bpay` | Comisión Bpay | 0.0374 (default, configurable en UI) |
 | `N` | Número de ciclos | Manual (default: 1) |
 
 ### Paso 1 — VES → USD Digital (BDV)
@@ -114,6 +114,12 @@ ganancia_acumulada_USD = ganancia_acumulada_VES / T_bcv
 | Tasa Binance P2P (VES/USDT) | Numérico decimal | ✅ localStorage |
 | Capital a trabajar (VES) | Numérico entero | ✅ localStorage |
 | Número de ciclos | Entero 1–20 | ✅ localStorage |
+
+**Comisiones (configurables):**
+| Campo | Tipo | Default | Persistencia |
+|-------|------|---------|-------------|
+| Comisión BDV | Porcentaje (0-100) | 2.85% | ✅ localStorage |
+| Comisión Bpay | Porcentaje (0-100) | 3.74% | ✅ localStorage |
 
 Hint visual debajo de cada campo de tasa:
 > "Consulta las tasas del día en @monitordolarvzla" (con link a IG)
@@ -253,12 +259,14 @@ const DEFAULT_STATE = {
   tasaP2P: '',
   capitalVES: '',
   numCiclos: 1,
+  feeBDV: 2.85,
+  feeBpay: 3.74,
 }
 
 // Output del hook
 {
   // Estado (input)
-  rates: { tasaBCV, tasaDigital, tasaP2P, capitalVES, numCiclos },
+  rates: { tasaBCV, tasaDigital, tasaP2P, capitalVES, numCiclos, feeBDV, feeBpay },
   setField: (key, value) => void,
   reset: () => void,
 
@@ -305,10 +313,11 @@ const DEFAULT_STATE = {
 ## 7. Funciones Puras — `/lib/arbitrage.js`
 
 ```js
-export const FEE_BDV = 0.0285
-export const FEE_BPAY = 0.0374
+// Valores por defecto (se pueden sobrescribir desde la UI)
+export const DEFAULT_FEE_BDV = 0.0285;  // 2.85%
+export const DEFAULT_FEE_BPAY = 0.0374; // 3.74%
 
-export function calcCycle({ capital, tasaDigital, tasaP2P, tasaBCV }) {
+export function calcCycle({ capital, tasaDigital, tasaP2P, tasaBCV, feeBDV = DEFAULT_FEE_BDV, feeBpay = DEFAULT_FEE_BPAY }) {
   const usdBruto = capital / tasaDigital
   const comisionBDV = usdBruto * FEE_BDV
   const usdNeto = usdBruto * (1 - FEE_BDV)
@@ -334,11 +343,11 @@ export function calcCycle({ capital, tasaDigital, tasaP2P, tasaBCV }) {
   }
 }
 
-export function calcMultiCiclo({ capital, tasaDigital, tasaP2P, tasaBCV, n }) {
+export function calcMultiCiclo({ capital, tasaDigital, tasaP2P, tasaBCV, n, feeBDV = DEFAULT_FEE_BDV, feeBpay = DEFAULT_FEE_BPAY }) {
   const ciclos = []
   let capitalActual = capital
   for (let i = 1; i <= n; i++) {
-    const r = calcCycle({ capital: capitalActual, tasaDigital, tasaP2P, tasaBCV })
+    const r = calcCycle({ capital: capitalActual, tasaDigital, tasaP2P, tasaBCV, feeBDV, feeBpay })
     ciclos.push({
       n: i,
       capitalEntrada: capitalActual,
@@ -454,13 +463,13 @@ Paso 2:
   USDT neto    = 10.502,70 - 392,80    = 10.109,90 USDT
 
 Paso 3:
-  VES finales  = 10.109,90 × 97.80     = 988.547,22 VES
+  VES finales  = 10.109,90 × 97.80     = 988.748,22 VES
 
 Resultado:
-  Ganancia VES = 988.547,22 - 1.000.000 = -11.452,78 VES  ← PÉRDIDA
-  Ganancia USD = -11.452,78 / 91.20     =    -125,58 USD
-  Porcentaje   = -1.145%
-  Break-even P2P ≈ 99.37 VES/USDT
+  Ganancia VES = 988.748,22 - 1.000.000 = -11.251,78 VES  ← PÉRDIDA
+  Ganancia USD = -11.251,78 / 91.20     =    -123,37 USD
+  Porcentaje   = -1.125%
+  Break-even P2P ≈ 98.91 VES/USDT
 
 → Con P2P = 99.40 el ciclo entra en ganancia mínima
 → La tasa P2P necesita superar ~7.43% a la Digital para cubrir ambas comisiones
