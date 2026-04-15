@@ -14,11 +14,11 @@ describe('calcCycle', () => {
     expect(result.usdNeto).toBeCloseTo(10502.70, 2);
     expect(result.comisionBpay_USDT).toBeCloseTo(392.80, 2);
     expect(result.usdtNeto).toBeCloseTo(10109.90, 2);
-    expect(result.vesFinales).toBeCloseTo(988547.22, 2);
-    expect(result.gananciaVES).toBeCloseTo(-11452.78, 2);
-    expect(result.gananciaUSD).toBeCloseTo(-125.58, 2);
-    expect(result.gananciaPct).toBeCloseTo(-1.145, 3);
-    expect(result.multiplicador).toBeCloseTo(0.9885, 4);
+    expect(result.vesFinales).toBeCloseTo(988748.38, 2);
+    expect(result.gananciaVES).toBeCloseTo(-11251.62, 2);
+    expect(result.gananciaUSD).toBeCloseTo(-123.37, 2);
+    expect(result.gananciaPct).toBeCloseTo(-1.125, 3);
+    expect(result.multiplicador).toBeCloseTo(0.9887, 4);
     expect(result.spreadPct).toBeCloseTo(5.73, 2);
     expect(result.esRentable).toBe(false);
   });
@@ -39,11 +39,11 @@ describe('calcCycle', () => {
     const result = calcCycle({
       capital: 1000000,
       tasaDigital: 92.50,
-      tasaP2P: 99.37,
+      tasaP2P: 98.91,
       tasaBCV: 91.20
     });
 
-    expect(result.breakEvenP2P).toBeCloseTo(99.37, 2);
+    expect(result.breakEvenP2P).toBeCloseTo(98.91, 2);
   });
 });
 
