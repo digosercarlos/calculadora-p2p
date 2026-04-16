@@ -76,11 +76,11 @@ export default function Home() {
     updateInput(hookKey, parsedValue);
   };
 
-  const handleFeeChange = (key, value) => {
+  const handleFeeChange = (key: string, value: number) => {
     updateInput(key, value);
   };
 
-  const handleGananciaObjetivoChange = (value) => {
+  const handleGananciaObjetivoChange = (value: number) => {
     setGananciaObjetivoUSD(value);
   };
 
