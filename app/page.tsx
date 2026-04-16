@@ -3,7 +3,7 @@
 import React from 'react';
 import { useArbitrageCalc } from '../hooks/useArbitrageCalc';
 import RatesPanel from '../components/RatesPanel';
-import { RatesPanelProyecciones } from '../components/RatesPanelProyecciones';
+import RatesPanelProyecciones from '../components/RatesPanelProyecciones';
 import ResultsGrid from '../components/ResultsGrid';
 import SecondaryMetrics from '../components/SecondaryMetrics';
 import CycleBreakdown from '../components/CycleBreakdown';
@@ -39,7 +39,7 @@ export default function Home() {
       addToHistory();
       setShowHistoryButton(true);
     }
-  }, [debouncedInputs, addToHistory]);
+  }, [debouncedInputs, addToHistory, inputs]);
 
   // Map inputs to the format expected by RatesPanel
   const rates = {
