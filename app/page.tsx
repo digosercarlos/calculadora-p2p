@@ -1,11 +1,15 @@
 'use client';
 
+import React from 'react';
 import { useArbitrageCalc } from '../hooks/useArbitrageCalc';
 import RatesPanel from '../components/RatesPanel';
+import { RatesPanelProyecciones } from '../components/RatesPanelProyecciones';
 import ResultsGrid from '../components/ResultsGrid';
 import SecondaryMetrics from '../components/SecondaryMetrics';
 import CycleBreakdown from '../components/CycleBreakdown';
 import MultiCycleTable from '../components/MultiCycleTable';
+import HistoryModal from '../components/HistoryModal';
+import { useDebounce } from '../hooks/useDebounce';
 
 export default function Home() {
   const {
@@ -14,8 +18,28 @@ export default function Home() {
     reset,
     singleCycleResult,
     multiCycleResults,
-    isValid
+    isValid,
+    history,
+    addToHistory,
+    clearHistory,
+    activeTab,
+    setActiveTab,
+    gananciaObjetivoUSD,
+    setGananciaObjetivoUSD,
+    proyeccionResult
   } = useArbitrageCalc();
+
+  const [isHistoryOpen, setIsHistoryOpen] = React.useState(false);
+  const [showHistoryButton, setShowHistoryButton] = React.useState(false);
+
+  const debouncedInputs = useDebounce(inputs, 2000);
+
+  React.useEffect(() => {
+    if (debouncedInputs !== inputs) {
+      addToHistory();
+      setShowHistoryButton(true);
+    }
+  }, [debouncedInputs, addToHistory]);
 
   // Map inputs to the format expected by RatesPanel
   const rates = {
@@ -52,14 +76,32 @@ export default function Home() {
     updateInput(hookKey, parsedValue);
   };
 
+  const handleFeeChange = (key, value) => {
+    updateInput(key, value);
+  };
+
+  const handleGananciaObjetivoChange = (value) => {
+    setGananciaObjetivoUSD(value);
+  };
+
   return (
     <main className="min-h-screen bg-zinc-950">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-zinc-100 mb-2">
-            Calculadora P2P
-          </h1>
+          <div className="flex items-center justify-center gap-4 mb-2">
+            <h1 className="text-4xl font-bold text-zinc-100">
+              Calculadora P2P
+            </h1>
+            {showHistoryButton && (
+              <button
+                onClick={() => setIsHistoryOpen(true)}
+                className="px-3 py-1 text-sm font-medium text-zinc-400 hover:text-zinc-200 bg-zinc-800 hover:bg-zinc-700 rounded-md transition-colors"
+              >
+                Historial
+              </button>
+            )}
+          </div>
           <p className="text-zinc-400">
             Calcula arbitraje entre tasas de cambio digitales y P2P
           </p>
@@ -68,14 +110,33 @@ export default function Home() {
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Input Panel */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-6">
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
               <RatesPanel
                 rates={rates}
                 setField={handleFieldChange}
                 reset={reset}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                feeBDV={inputs.feeBDV}
+                feeBpay={inputs.feeBpay}
+                onFeeChange={handleFeeChange}
               />
             </div>
+
+            {activeTab === 'proyecciones' && (
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                <RatesPanelProyecciones
+                  gananciaObjetivoUSD={gananciaObjetivoUSD}
+                  onChange={handleGananciaObjetivoChange}
+                  proyeccionResult={proyeccionResult}
+                  currentRates={{
+                    tasaDigital: inputs.tasaDigital,
+                    tasaP2P: inputs.tasaP2P
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Right Column - Results */}
@@ -87,6 +148,7 @@ export default function Home() {
               </h2>
               <ResultsGrid
                 singleCycleResult={singleCycleResult}
+                multiCycleResults={multiCycleResults}
                 isValid={isValid}
               />
             </div>
@@ -114,6 +176,14 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* History Modal */}
+      <HistoryModal
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        history={history}
+        onClear={clearHistory}
+      />
     </main>
   );
 }

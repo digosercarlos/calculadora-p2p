@@ -5,41 +5,50 @@ import { formatPct, formatVES, formatUSD } from '../lib/formatters';
 /**
  * ResultsGrid Component
  *
- * Displays the 4 main arbitrage metrics in a 2x2 grid:
+ * Displays the main arbitrage metrics in a grid:
  * - Percentage gain (with semantic color)
  * - Gain in VES
  * - Gain in USD
  * - Capital multiplier
+ * - Multi-cycle gain card (NEW)
  *
  * @param {Object} props
  * @param {Object|null} props.singleCycleResult - The calculated cycle result from useArbitrageCalc
+ * @param {Array|null} props.multiCycleResults - Array of multi-cycle results
  * @param {boolean} props.isValid - Whether the inputs are valid
  */
-export default function ResultsGrid({ singleCycleResult, isValid }) {
+export default function ResultsGrid({ singleCycleResult, multiCycleResults, isValid }) {
   // If not valid or no result, show placeholder cards
   if (!isValid || !singleCycleResult) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ResultCard label="Ganancia %" value="—" color="gray" size="lg" />
-        <ResultCard label="Ganancia VES" value="—" color="gray" size="md" />
-        <ResultCard label="Ganancia USD" value="—" color="gray" size="md" />
-        <ResultCard label="Multiplicador" value="—" color="gray" size="md" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <ResultCard label="Ganancia %" value="—" color="neutral" size="lg" />
+        <ResultCard label="Ganancia VES" value="—" color="neutral" size="md" />
+        <ResultCard label="Ganancia USD" value="—" color="neutral" size="md" />
+        <ResultCard label="Multiplicador" value="—" color="neutral" size="md" />
       </div>
     );
   }
 
-  // Determine color based on profitability
+  // Determine color based on profitability - new color scheme for dark theme
   const getColorForProfit = () => {
-    if (singleCycleResult.gananciaPct > 5) return 'green';
-    if (singleCycleResult.gananciaPct > 0) return 'blue';
-    if (singleCycleResult.gananciaPct > -2) return 'yellow';
-    return 'red';
+    if (singleCycleResult.gananciaPct > 5) return 'profit-green';
+    if (singleCycleResult.gananciaPct > 0) return 'profit-blue';
+    if (singleCycleResult.gananciaPct > -2) return 'profit-yellow';
+    return 'profit-red';
+  };
+
+  const getMultiCycleColor = () => {
+    const lastCycle = multiCycleResults?.[multiCycleResults.length - 1];
+    if (!lastCycle) return 'neutral';
+    if (lastCycle.gananciaAcumuladaVES > 0) return 'profit-green';
+    return 'profit-red';
   };
 
   const profitColor = getColorForProfit();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {/* Main metric: Percentage gain */}
       <ResultCard
         label="Ganancia %"
@@ -68,9 +77,21 @@ export default function ResultsGrid({ singleCycleResult, isValid }) {
       <ResultCard
         label="Multiplicador"
         value={singleCycleResult.multiplicador.toFixed(4) + 'x'}
-        color="blue"
+        color="neutral"
         size="md"
       />
+
+      {/* NEW: Multi-cycle gain card */}
+      {multiCycleResults && multiCycleResults.length > 0 && (
+        <ResultCard
+          label="Ganancia N Ciclos"
+          value={formatVES(multiCycleResults[multiCycleResults.length - 1].gananciaAcumuladaVES)}
+          subvalue={formatUSD(multiCycleResults[multiCycleResults.length - 1].gananciaAcumuladaUSD)}
+          color={getMultiCycleColor()}
+          size="lg"
+          span={2}
+        />
+      )}
     </div>
   );
 }
